@@ -8,7 +8,7 @@ namespace WeatherApp.UI
 {
     /// <summary>
     /// UI Controller for the Weather Application
-    /// Students will connect this to the API client and handle user interactions
+    /// Connects UI components with the Weather API client and handles user interactions
     /// </summary>
     public class WeatherUIController : MonoBehaviour
     {
@@ -17,10 +17,10 @@ namespace WeatherApp.UI
         [SerializeField] private Button getWeatherButton;
         [SerializeField] private TextMeshProUGUI weatherDisplayText;
         [SerializeField] private TextMeshProUGUI statusText;
-        
+
         [Header("API Client")]
         [SerializeField] private WeatherApiClient apiClient;
-        
+
         private void Start()
         {
             // Set up button click listener
@@ -29,35 +29,45 @@ namespace WeatherApp.UI
             // Initialize UI state
             SetStatusText("Enter a city name and click Get Weather");
         }
-        
-        /// TODO: Students will implement this method
+        /// <summary>
+        /// Called when the "Get Weather" button is clicked
+        /// </summary>
         private async void OnGetWeatherClicked()
         {
             // Get city name from input field
             string cityName = cityInputField.text;
-            
+
             // Validate input
             if (string.IsNullOrWhiteSpace(cityName))
             {
                 SetStatusText("Please enter a city name");
                 return;
             }
-            
-            // Disable button and show loading state
+
+            // Disable button and show Loading state
             getWeatherButton.interactable = false;
             SetStatusText("Loading weather data...");
             weatherDisplayText.text = "";
-            
+
             try
             {
-                // TODO: Call API client to get weather data
-              
-                
-                // TODO: Handle the response
+                // Call API client to get weather data
+                WeatherData weatherData = await apiClient.GetWeatherDataAsync(cityName);
+
+                // Handle the response
+                if (weatherData != null && weatherData.IsValid)
+                {
+                    DisplayWeatherData(weatherData);
+                    SetStatusText("Weather data loaded successfully");
+                }
+                else
+                {
+                    SetStatusText("Failed to retrieve valid weather data");
+                }
             }
             catch (System.Exception ex)
             {
-                // Handle exceptions
+                // Hanlde exceptions
                 Debug.LogError($"Error getting weather data: {ex.Message}");
                 SetStatusText("An error occurred. Please try again.");
             }
@@ -67,30 +77,33 @@ namespace WeatherApp.UI
                 getWeatherButton.interactable = true;
             }
         }
-        
-        /// TODO: Students will implement this method
+        /// <summary>
+        /// Displays formatted weather data in the UI
+        /// </summary>
+        /// <param name="weatherData">Weather data returned from API</param>
         private void DisplayWeatherData(WeatherData weatherData)
         {
-            // TODO: Format and display weather information
-            // Example format:
-            // City: London
-            // Temperature: 15.2°C (Feels like: 14.1°C)
-            // Description: Clear sky
-            // Humidity: 65%
-            // Pressure: 1013 hPa
+            // Format and 
+            string displayText = $"City: {weatherData.CityName}\n";
 
-            string displayText = "";
-            
-            // TODO: Add more weather details
             if (weatherData.Main != null)
             {
-                displayText += "";
-                displayText += "";
+                float tempC = weatherData.TemperatureInCelsius;
+                float feelsLikeC = weatherData.FeelsLikeInCelsius;
+
+                displayText += $"Temperature: {tempC:F1}°C (Feels like: {feelsLikeC:F1}°C)\n";
+                displayText += $"Humidity: {weatherData.Main.Humidity}%\n";
+                displayText += $"Pressure: {weatherData.Main.Pressure} hPa\n";
             }
-            
+
+            if (!string.IsNullOrEmpty(weatherData.PrimaryDescription))
+            {
+                displayText += $"Description: {weatherData.PrimaryDescription}";
+            }
+
             weatherDisplayText.text = displayText;
         }
-        
+
         private void SetStatusText(string message)
         {
             if (statusText != null)
@@ -98,7 +111,7 @@ namespace WeatherApp.UI
                 statusText.text = message;
             }
         }
-        
+
         public void ClearDisplay()
         {
             weatherDisplayText.text = "";
