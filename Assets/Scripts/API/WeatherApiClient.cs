@@ -14,6 +14,7 @@ namespace WeatherApp.Services
     public class WeatherApiClient : MonoBehaviour
     {
         [Header("API Configuration")]
+        [SerializeField] private string apiKey = "YOUR_API_KEY";
         [SerializeField] private string baseUrl = "http://api.openweathermap.org/data/2.5/weather";
 
         /// <summary>

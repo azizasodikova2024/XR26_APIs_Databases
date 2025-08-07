@@ -21,16 +21,18 @@ namespace WeatherApp.Data
 
         [JsonProperty("cod")]
         public int StatusCode { get; set; }
-        
+
         // Helper properties for easier data access
-        public float TemperatureInCelsius => Main?.Temperature - 273.15f ?? 0f;
+        public float TemperatureInCelsius => Main?.Temperature ?? 0f;
+        public float FeelsLikeInCelsius => Main?.FeelsLike ?? 0f;
+        public int Humidity => Main?.Humidity ?? 0;
+        public int Pressure => Main?.Pressure ?? 0;
         public string PrimaryDescription => Weather?.Length > 0 ? Weather[0].Description : "Unknown";
-        
+
         // Validation method
         public bool IsValid => StatusCode == 200 && Main != null && !string.IsNullOrEmpty(CityName);
-
-        public float FeelsLikeInCelsius { get; internal set; }
     }
+}
 
     /// <summary>
     /// Main weather information (temperature, humidity, etc.)
@@ -68,4 +70,3 @@ namespace WeatherApp.Data
         [JsonProperty("icon")] 
         public string Icon { get; set; }
     }
-}

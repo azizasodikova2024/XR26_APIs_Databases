@@ -83,26 +83,24 @@ namespace WeatherApp.UI
         /// <param name="weatherData">Weather data returned from API</param>
         private void DisplayWeatherData(WeatherData weatherData)
         {
-            // Format and 
-            string displayText = $"City: {weatherData.CityName}\n";
+            string displayText = "";
 
             if (weatherData.Main != null)
             {
-                float tempC = weatherData.TemperatureInCelsius;
-                float feelsLikeC = weatherData.FeelsLikeInCelsius;
-
-                displayText += $"Temperature: {tempC:F1}°C (Feels like: {feelsLikeC:F1}°C)\n";
-                displayText += $"Humidity: {weatherData.Main.Humidity}%\n";
-                displayText += $"Pressure: {weatherData.Main.Pressure} hPa\n";
+                displayText += $"City: {weatherData.CityName}\n";
+                displayText += $"Temperature: {weatherData.TemperatureInCelsius:F1}°C (Feels like: {weatherData.FeelsLikeInCelsius:F1}°C)\n";
+                displayText += $"Humidity: {weatherData.Humidity}%\n";
+                displayText += $"Pressure: {weatherData.Pressure} hPa\n";
             }
 
-            if (!string.IsNullOrEmpty(weatherData.PrimaryDescription))
+            if (weatherData.Weather != null && weatherData.Weather.Length > 0)
             {
                 displayText += $"Description: {weatherData.PrimaryDescription}";
             }
 
             weatherDisplayText.text = displayText;
         }
+
 
         private void SetStatusText(string message)
         {

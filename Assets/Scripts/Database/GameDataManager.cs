@@ -32,18 +32,19 @@ namespace Databases
                 Destroy(gameObject);
             }
         }
-        
-        /// TODO: Students will implement this method
+
         private void InitializeDatabase()
         {
             try
             {
-                // TODO: Set up database path using Application.persistentDataPath
-                _databasePath = "";
-                
-                // TODO: Create SQLite connection
+                // Set up database path
+                _databasePath = Path.Combine(Application.persistentDataPath, databaseName);
 
-                // TODO: Create tables for game data
+                // Create SQLite connection
+                _database = new SQLiteConnection(_databasePath);
+
+                // Create tables
+                _database.CreateTable<HighScore>();
 
                 Debug.Log($"Database initialized at: {_databasePath}");
             }
@@ -52,17 +53,16 @@ namespace Databases
                 Debug.LogError($"Failed to initialize database: {ex.Message}");
             }
         }
-        
+
+
         #region High Score Operations
-        
-        /// TODO: Students will implement this method
+
         public void AddHighScore(string playerName, int score, string levelName = "Default")
         {
             try
             {
-                // TODO: Create a new HighScore object
-                // TODO: Insert it into the database using _database.Insert()
-                
+                var newScore = new HighScore(playerName, score, levelName);
+                _database.Insert(newScore);
                 Debug.Log($"High score added: {playerName} - {score} points");
             }
             catch (Exception ex)
@@ -70,15 +70,15 @@ namespace Databases
                 Debug.LogError($"Failed to add high score: {ex.Message}");
             }
         }
-        
-        /// TODO: Students will implement this method
+
         public List<HighScore> GetTopHighScores(int limit = 10)
         {
             try
             {
-                // TODO: Query the database for top scores
-                
-                return new List<HighScore>(); // Placeholder - students will replace this
+                return _database.Table<HighScore>()
+                                .OrderByDescending(h => h.Score)
+                                .Take(limit)
+                                .ToList();
             }
             catch (Exception ex)
             {
@@ -86,15 +86,17 @@ namespace Databases
                 return new List<HighScore>();
             }
         }
-        
-        /// TODO: Students will implement this method
+
+
         public List<HighScore> GetHighScoresForLevel(string levelName, int limit = 10)
         {
             try
             {
-                // TODO: Query the database for scores filtered by level
-                
-                return new List<HighScore>(); // Placeholder - students will replace this
+                return _database.Table<HighScore>()
+                                .Where(h => h.LevelName == levelName)
+                                .OrderByDescending(h => h.Score)
+                                .Take(limit)
+                                .ToList();
             }
             catch (Exception ex)
             {
@@ -102,19 +104,17 @@ namespace Databases
                 return new List<HighScore>();
             }
         }
-        
+
         #endregion
-        
+
         #region Database Utility Methods
-        
+
         /// TODO: Students will implement this method
         public int GetHighScoreCount()
         {
             try
             {
-                // TODO: Count the total number of high scores
-                
-                return 0; // Placeholder - students will replace this
+                return _database.Table<HighScore>().Count();
             }
             catch (Exception ex)
             {
@@ -122,14 +122,12 @@ namespace Databases
                 return 0;
             }
         }
-        
-        /// TODO: Students will implement this method
+
         public void ClearAllHighScores()
         {
             try
             {
-                // TODO: Delete all high scores from the database
-                
+                _database.DeleteAll<HighScore>();
                 Debug.Log("All high scores cleared");
             }
             catch (Exception ex)
@@ -137,7 +135,8 @@ namespace Databases
                 Debug.LogError($"Failed to clear high scores: {ex.Message}");
             }
         }
-        
+
+
         /// <summary>
         /// Close the database connection when the application quits
         /// </summary>
